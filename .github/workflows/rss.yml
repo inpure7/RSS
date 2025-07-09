@@ -30,6 +30,10 @@ jobs:
           git config user.name github-actions
           git config user.email github-actions@github.com
           git add rss.xml
-          git commit -m "Update RSS feed"
-          git push
-        continue-on-error: true  # 변경 없을 때 오류 방지
+          if ! git diff --cached --quiet; then
+            git commit -m "Update RSS feed"
+            git push
+          else
+            echo "No changes in rss.xml – skipping commit."
+          fi
+
