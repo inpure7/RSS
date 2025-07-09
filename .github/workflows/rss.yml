@@ -1,0 +1,35 @@
+name: Generate RSS Feed
+
+on:
+  schedule:
+    - cron: '0 9 * * *'  # 매일 오전 9시 UTC (한국 기준 오후 6시)
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install requests beautifulsoup4 feedgen
+
+      - name: Run RSS generator script
+        run: python rss_generator.py
+
+      - name: Commit updated rss.xml
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add rss.xml
+          git commit -m "Update RSS feed"
+          git push
+        continue-on-error: true  # 변경 없을 때 오류 방지
