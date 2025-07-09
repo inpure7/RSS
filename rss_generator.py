@@ -3,7 +3,11 @@ from bs4 import BeautifulSoup
 from feedgen.feed import FeedGenerator
 
 BASE_URL = "https://www.pipc.go.kr"
-BOARD_URL = f"{BASE_URL}/np/cop/bbs/selectBoardList.do?bbsId=BS074"
+
+BOARDS = {
+    "보도자료": "https://www.pipc.go.kr/np/cop/bbs/selectBoardList.do?bbsId=BS074",
+    "공지사항": "https://www.pipc.go.kr/np/cop/bbs/selectBoardList.do?bbsId=BS061"
+}
 
 def generate_rss():
     res = requests.get(BOARD_URL)
@@ -13,7 +17,7 @@ def generate_rss():
     fg = FeedGenerator()
     fg.title("개인정보위 보도자료")
     fg.link(href=BOARD_URL, rel='alternate')
-    fg.description("개인정보보호위원회 보도자료 자동 생성 RSS 피드")
+    fg.description("자동 생성 RSS 피드")
 
     for item in items[:5]:
         title_tag = item.select_one("td.subject a")
