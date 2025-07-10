@@ -48,11 +48,13 @@ for name, url in BOARDS.items():
             fe.link(href=link)
             fe.pubDate(date)
 
+    # 아무 것도 안 수집된 경우를 대비한 테스트 항목
+    fe = fg.add_entry()
+    fe.title("[테스트] 새 글이 없을 때를 위한 확인용 항목")
+    fe.link(href="https://example.com")
+    fe.pubDate("Wed, 09 Jul 2025 00:00:00 +0000")
+
+
     except Exception as e:
         print(f"❗ [{name}] 오류 발생: {e}")
 
-# 아무 것도 안 수집된 경우를 대비한 테스트 항목
-fe = fg.add_entry()
-fe.title("[테스트] 새 글이 없을 때를 위한 확인용 항목")
-fe.link(href="https://example.com")
-fe.pubDate("Wed, 09 Jul 2025 00:00:00 +0000")
