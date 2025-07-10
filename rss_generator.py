@@ -10,28 +10,41 @@ BOARDS = {
 }
 
 def generate_rss():
-    res = requests.get(BOARD_URL)
-    soup = BeautifulSoup(res.text, "html.parser")
-
-    items = soup.select(".list_board tbody tr")
     fg = FeedGenerator()
-    fg.title("개인정보위 보도자료")
-    fg.link(href=BOARD_URL, rel='alternate')
-    fg.description("자동 생성 RSS 피드")
+    fg.title("개인정보위 통합 RSS")
+    fg.link(href=BASE_URL, rel='alternate')
+    fg.description("보도자료 + 공지사항 게시판 자동 RSS")
 
-    for item in items[:5]:
-        title_tag = item.select_one("td.subject a")
-        title = title_tag.text.strip()
-        href = title_tag["href"]
-        link = BASE_URL + href
-        date = item.select("td")[-1].text.strip()
+    for name, url in BOARDS.items():
+        try:
+            print(f"📥 {name} 수집 중... ({url})")
+            res = requests.get(url, headers={"User-Agent": "Mozilla/5.0"})
+            res.raise_for_status()
+            soup = BeautifulSoup(res.text, "html.parser")
 
-        fe = fg.add_entry()
-        fe.title(title)
-        fe.link(href=link)
-        fe.pubDate(date)
+            rows = soup.select("table.list_board tbody tr")
+            for row in rows[:5]:
+                title_tag = row.select_one("td.subject a")
+                if not title_tag:
+                    continue
+                cols = row.select("td")
+                if len(cols) < 4:
+                    continue
+
+                title = title_tag.text.strip()
+                href = title_tag.get("href", "")
+                link = BASE_URL + href if href else BASE_URL
+                date = cols[-1].text.strip()
+
+                fe = fg.add_entry()
+                fe.title(f"[{name}] {title}")
+                fe.link(href=link)
+                fe.pubDate(date)
+        except Exception as e:
+            print(f"⚠️ [{name}] 오류 발생: {e}")
 
     fg.rss_file("rss.xml")
+    print("✅ rss.xml 생성 완료")
 
 if __name__ == "__main__":
     generate_rss()
